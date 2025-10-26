@@ -50,10 +50,11 @@ fn get_matches(input: RString, windows: &[Node]) -> RVec<Match> {
         .into_iter()
         .map(|(n, _)| {
             let window_title = n.name.clone().unwrap_or("".into());
+            let class = n.app_id.clone().unwrap_or("".into());
             Match {
-                id: None.into(),
+                id: Some(n.id as u64).into(),
                 icon: None.into(),
-                title: window_title.clone().into(),
+                title: class.into(),
                 description: Some(window_title.into()).into(),
                 use_pango: false,
             }
@@ -62,7 +63,13 @@ fn get_matches(input: RString, windows: &[Node]) -> RVec<Match> {
 }
 
 #[handler]
-fn handler(_selection: Match) -> HandleResult {
-    // Handle the selected match and return how anyrun should proceed
+fn handler(selection: Match) -> HandleResult {
+    let mut connection = Connection::new().expect("get connection");
+    connection
+        .run_command(format!(
+            "[con_id={}] focus",
+            selection.id.expect("got no id")
+        ))
+        .expect("focus window");
     HandleResult::Close
 }
