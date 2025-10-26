@@ -26,8 +26,8 @@ fn collect_windows() -> Result<Vec<Node>, Box<dyn Error>> {
 #[info]
 fn info() -> PluginInfo {
     PluginInfo {
-        name: "Sway Windows".into(),
-        icon: "window-new".into(),
+        name: "Windows".into(),
+        icon: "window".into(),
     }
 }
 
