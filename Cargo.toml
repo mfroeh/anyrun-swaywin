@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [lib]
+name = "swaywin"
 crate-type = ["cdylib"] # Required to build a dynamic library that can be loaded by anyrun
 
 [dependencies]
