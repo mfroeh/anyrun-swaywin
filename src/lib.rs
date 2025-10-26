@@ -34,13 +34,21 @@ fn info() -> PluginInfo {
 #[get_matches]
 fn get_matches(input: RString, windows: &[Node]) -> RVec<Match> {
     let matcher = SkimMatcherV2::default();
-    let matching_windows = windows.iter().filter(|n| {
-        matcher
-            .fuzzy_match(&n.name.clone().unwrap_or("".into()), &input)
-            .is_some()
-    });
-    matching_windows
-        .map(|n| {
+    let mut scored_windows: Vec<_> = windows
+        .iter()
+        .filter_map(|n| {
+            let score = matcher.fuzzy_match(&n.name.clone().unwrap_or("".into()), &input);
+            if let Some(score) = score {
+                return Some((n, score));
+            }
+            None
+        })
+        .collect();
+    scored_windows.sort_by_key(|f| -f.1);
+
+    scored_windows
+        .into_iter()
+        .map(|(n, _)| {
             let window_title = n.name.clone().unwrap_or("".into());
             Match {
                 id: None.into(),
