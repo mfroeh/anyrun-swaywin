@@ -34,14 +34,20 @@ fn info() -> PluginInfo {
 // https://github.com/anyrun-org/anyrun/blob/master/plugins/applications/src/lib.rs
 #[get_matches]
 fn get_matches(input: RString, windows: &[Node]) -> RVec<Match> {
+    let words: Vec<_> = input.split_whitespace().collect();
     let matcher = SkimMatcherV2::default();
     let mut scored_windows: Vec<_> = windows
         .iter()
         .filter_map(|n| {
-            let app_id = n.app_id.clone().unwrap_or("".into());
-            let name = n.name.clone().unwrap_or("".into());
-            let mut score = matcher.fuzzy_match(&app_id, &input).unwrap_or_default() * 2;
-            score += matcher.fuzzy_match(&name, &input).unwrap_or_default();
+            let score: i64 = words
+                .iter()
+                .map(|w| {
+                    let app_id = n.app_id.clone().unwrap_or("".into());
+                    let name = n.name.clone().unwrap_or("".into());
+                    let score = matcher.fuzzy_match(&app_id, w).unwrap_or_default() * 2;
+                    score + matcher.fuzzy_match(&name, w).unwrap_or_default()
+                })
+                .sum();
             if score == 0 {
                 return None;
             }
