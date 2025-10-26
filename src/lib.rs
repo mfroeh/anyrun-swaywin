@@ -39,17 +39,23 @@ fn get_matches(input: RString, windows: &[Node]) -> RVec<Match> {
     let mut scored_windows: Vec<_> = windows
         .iter()
         .filter_map(|n| {
-            let score: i64 = words
-                .iter()
-                .map(|w| {
-                    let app_id = n.app_id.clone().unwrap_or("".into());
-                    let name = n.name.clone().unwrap_or("".into());
-                    let score = matcher.fuzzy_match(&app_id, w).unwrap_or_default() * 2;
-                    score + matcher.fuzzy_match(&name, w).unwrap_or_default()
-                })
-                .sum();
-            if score == 0 {
-                return None;
+            let scores = words.iter().map(|w| {
+                let app_id = n.app_id.clone().unwrap_or("".into());
+                let name = n.name.clone().unwrap_or("".into());
+                let mut score = matcher.fuzzy_match(&app_id, w).unwrap_or_default() * 2;
+                score += matcher.fuzzy_match(&name, w).unwrap_or_default();
+                if score == 0 {
+                    return None;
+                }
+                Some(score)
+            });
+            let mut score = 0;
+            for s in scores {
+                if let Some(s) = s {
+                    score += s;
+                } else {
+                    return None;
+                }
             }
             Some((n, score))
         })
