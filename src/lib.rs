@@ -1,12 +1,12 @@
 use std::error::Error;
 
-use abi_stable::std_types::{ROption, RString, RVec};
+use abi_stable::std_types::{RString, RVec};
 use anyrun_plugin::*;
 use fuzzy_matcher::{FuzzyMatcher, skim::SkimMatcherV2};
 use swayipc::{Connection, Node, NodeType};
 
 #[init]
-fn init(config_dir: RString) -> Vec<Node> {
+fn init(_config_dir: RString) -> Vec<Node> {
     collect_windows().expect("collect sway windows")
 }
 
@@ -54,7 +54,7 @@ fn get_matches(input: RString, windows: &[Node]) -> RVec<Match> {
 }
 
 #[handler]
-fn handler(selection: Match) -> HandleResult {
+fn handler(_selection: Match) -> HandleResult {
     // Handle the selected match and return how anyrun should proceed
     HandleResult::Close
 }
